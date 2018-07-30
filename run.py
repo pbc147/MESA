@@ -2,8 +2,8 @@ import fnmatch
 import os
 import numpy
 import math
-M=[1,10]
-Z=[0.01,0.02]
+M=[0.1,1,5,10,15,30]
+Z=[0.01,0.015,0.02]
 owd=os.getcwd()
 
 list=open(owd+'/list.txt','a+')
@@ -29,6 +29,7 @@ for i in range(len(M)):
         else:
             os.chdir(owd+"/M_"+str(M[i])+"/Z_"+str(Z[j]).replace('.','_'))
             os.system("./re")
+            os.system('python3 ./run.py')
         os.chdir(owd)    
 
 

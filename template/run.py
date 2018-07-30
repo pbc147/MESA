@@ -2,6 +2,7 @@ import fnmatch
 import numpy as np
 import os
 import mesa
+import mesa_func
 
 profs=len(fnmatch.filter(os.listdir('./LOGS/'), 'profile*.data'))
 X_c=np.zeros(profs)
@@ -28,9 +29,27 @@ for j in range(len(steps)):
 for i in range(profs):
     if not(X_c[i] in Xmin):
         os.remove('./LOGS/X_'+str(X_c[i])+'.data') 
+    else:
+        os.rename('./LOGS/X_'+str(X_c[i])+'.data','./LOGS/X_'+str(round(X_c[i],2)).replace('.','_')+'.data')
 
 os.system('rm ./LOGS/profile* ./LOGS/history.data')
 
 for i in range(len(steps)):
     if Xmin[i]!=0:
-        os.rename('./LOGS/X_'+str(Xmin[i])+'.data','./LOGS/X_'+str(round(Xmin[i],2)).replace('.','_')+'.data')
+        profile=mesa.profile('./LOGS/X_'+str(round(Xmin[i],2)).replace('.','_')+'.data')
+        r=np.array(profile.radius_cm)
+        rho=10**np.array(profile.logRho)
+        T=10**np.array(profile.logT)
+        dtbardr=mesa_func.tempgrad(profile)
+        diff=mesa_func.subad(profile)
+        g=np.array(profile.grav)
+        hrho=mesa_func.hrho(profile)
+        kappa=mesa_func.thermdiff(profile)
+        force=mesa_func.force(profile)
+        nu=[1e14]*len(r)
+        with open('./LOGS/Model_X_'+str(round(Xmin[i],2)).replace('.','_')+'.data','w+') as f:
+            f.write('version1\n')
+            np.savetxt(f, np.array([r, rho, T, dtbardr, diff, g, hrho, kappa, nu, force]).T)
+#        os.rename('./LOGS/X_'+str(Xmin[i])+'.data','./LOGS/X_'+str(round(Xmin[i],2)).replace('.','_')+'.data')
+
+os.system('rm ./LOGS/X_*')
